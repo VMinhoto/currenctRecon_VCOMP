@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import os
 from matplotlib import pyplot as plt
+import pickle
 
 FLANN_INDEX_KDTREE = 0
 
@@ -24,13 +25,15 @@ flann = cv2.FlannBasedMatcher(index_params, search_params)
 test=[
     "dataset/test/5__(4).jpg",
     "dataset/test/10__(7).jpg",
-    "dataset/test/20__(6).jpg"
+    "dataset/test/20__(6).jpg",
+    "dataset/test/50__(3).JPG"
 ]
-test=test[2]
+test=test[3]
 img1 = cv2.imread(test,0)
 
 kp1, des1 = sift.detectAndCompute(img1,None)
 
+descriptors={}
 outputClass=[]
 output=[]
 for element in dirs:
@@ -38,6 +41,8 @@ for element in dirs:
     img = cv2.imread(element,0)
     print("Detecting and computing" + element)
     kp2, des2 = sift.detectAndCompute(img,None)
+    descriptors[element.split("/")[2]]=des2
+    
     print("Adding...")
     matches = flann.knnMatch(des1,des2,k=2)
     good = 0
@@ -45,6 +50,8 @@ for element in dirs:
         if m.distance < 0.7*n.distance:
             good=good+1
     output.append(good)
+
+pickle.dump( descriptors, open( "descriptors.p", "wb" ) )
 
 print(outputClass)
 print(output)
